@@ -1,19 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 import time
+import numpy as np
+import utils
 
 class GameBoard(tk.Frame):
-
-    basura_list= [
-            [5, 7], [2, 7], [4, 4], [2, 0], [14, 21], 
-            [13, 15], [9, 7], [17, 23], [19, 25], [7, 22]
-            ]
-    
-    comida_list = [
-            [6,8], [3, 7], [4, 5], [9, 6], [15, 21], 
-            [10, 8], [9, 20], [3, 23], [5, 18], [17, 10]
-        ]
-    
 
     def __init__(self, parent, rows=20, columns=30, size=38, color1="#4995D8", color2="blue"):
      
@@ -23,6 +14,9 @@ class GameBoard(tk.Frame):
         self.color1 = color1
         self.color2 = color2
         self.pieces = {}
+        self.basura_items = {}
+        self.comida_items = {}
+        self.bateria_items = {}
         self.initx = 0
         self.inity = 0
         self.prior = 'Trash'
@@ -111,6 +105,12 @@ class GameBoard(tk.Frame):
     def addpiece(self, name, image, row=0, column=0):
         self.canvas.create_image(0,0, image=image, tags=(name), anchor="c")
         self.placepiece(name, row, column)
+        if (name[0:-1] == 'Basura') or (name[0:-2] == 'Basura') :
+            self.basura_items.update({name:(row, column)})
+        elif (name[0:-1] == 'Comida'):
+            self.comida_items.update({name:(row, column)})
+        if (name[0:-1] == 'Bateria'):
+            self.bateria_items.update({name:(row, column)})
 
     def placepiece(self, name, row, column):
         if row or column < 8:
@@ -132,12 +132,11 @@ class GameBoard(tk.Frame):
         self.canvas.after(100, self.eval) 
     
     def eval(self):
-        coords_priority = self.prioritize(self.prior)
+        coords_priority, key = self.prioritize(self.prior)
         self.timecounter -= 1
         time.sleep(0.5)
         self.coords = [self.inity, self.initx]
-        # print(coords)
-        # print(coords_priority)
+
         if self.coords[0] < coords_priority[0]:
             self.inity += 1
         elif self.coords[0] > coords_priority[0]:
@@ -147,6 +146,8 @@ class GameBoard(tk.Frame):
         elif self.coords[1] > coords_priority[1]:
             self.initx -= 1
         # FUNCION PARA BORRAR ELEMENTOS
+        if self.coords == coords_priority:
+            self.delete_task(key)
         #     print('Trashing...') 
         #     self.canvas.delete("Comida4")
         #     self.timecounter -= 3
@@ -164,35 +165,30 @@ class GameBoard(tk.Frame):
             ]
         return matrix
 
-    # def search_element(self, list_to_search):
-    #     print(self.coords)
-    #     count = 0
-    #     closest = 0, 0
-    #     for i in list_to_search:
-    #         x = list_to_search[count]
-    #         print(x)
-    #         print(self.coords[0] - x[0])
-    #         count += 1
-    #     return (closest)
-        
-
-        
     
     def prioritize(self, prior):
-        if self.timecounter < 90:
-            self.prior = 'Battery'
+        # if self.timecounter < 90:
+        #     self.prior = 'Battery'
 
-        if self.prior == 'Battery':
-            list_to_search = self.basura_list
-            x, y = list_to_search[4]
-        elif self.prior == 'Trash':
-            list_to_search = self.comida_list
-            x, y = list_to_search[7]
+        # if self.prior == 'Battery':
+        #     list_to_search = self.basura_list
+        if self.prior == 'Trash':
+            list_to_search = list(self.basura_items.values())
         
-        # x, y = self.search_element(list_to_search)
-        return([x, y])
+        sorted_list = sorted(list_to_search, key=lambda x: x[1])
+        x, y = sorted_list[0]
+        key = utils.get_key(self.basura_items, sorted_list[0])
+        return([x, y], key)
         
-
+    
+    def delete_task(self, key):
+        print(key)
+        if key[0:-1] == 'Basura' or key[0:-2] == 'Basura':
+            self.timecounter -= 5 
+            self.canvas.delete(key)
+            time.sleep(1)
+            self.basura_items = utils.removekey(self.basura_items, key)
+            print(self.basura_items)
     
 
     def refresh(self, event):
