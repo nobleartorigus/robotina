@@ -17,12 +17,15 @@ class GameBoard(tk.Frame):
         self.basura_items = {}
         self.comida_items = {}
         self.bateria_items = {}
+        self.wc_items = {}
+        self.pared_items = {}
+        self.cama_item = {}
         self.initx = 0
         self.inity = 0
-        self.prior = 'Trash'
+        self.prior = 'Basura'
         self.coords = [0, 0]
 
-        self.timecounter = 100
+        self.timecounter = 60
 
         self.Robotina = tk.PhotoImage(file=robotina)
         self.Basura = tk.PhotoImage(file=basura)
@@ -107,10 +110,16 @@ class GameBoard(tk.Frame):
         self.placepiece(name, row, column)
         if (name[0:-1] == 'Basura') or (name[0:-2] == 'Basura') :
             self.basura_items.update({name:(row, column)})
-        elif (name[0:-1] == 'Comida'):
+        elif (name[0:-1] == 'Comida') or (name[0:-2] == 'Comida') :
             self.comida_items.update({name:(row, column)})
-        if (name[0:-1] == 'Bateria'):
+        elif (name[0:-1] == 'Bateria'):
             self.bateria_items.update({name:(row, column)})
+        elif (name[0:-1] == 'WC'):
+            self.wc_items.update({name:(row, column)})
+        elif (name[0:-1] == 'Pared'):
+            self.pared_items.update({name:(row, column)})
+        elif (name == 'Cama'):
+            self.cama_item.update({name:(row, column)})
 
     def placepiece(self, name, row, column):
         if row or column < 8:
@@ -137,6 +146,11 @@ class GameBoard(tk.Frame):
         time.sleep(0.5)
         self.coords = [self.inity, self.initx]
 
+        if self.timecounter < 35 and self.timecounter > 20:
+            self.prior = 'Comida'
+        elif self.timecounter < 20:
+            self.prior = 'Bateria'
+
         if self.coords[0] < coords_priority[0]:
             self.inity += 1
         elif self.coords[0] > coords_priority[0]:
@@ -148,9 +162,6 @@ class GameBoard(tk.Frame):
         # FUNCION PARA BORRAR ELEMENTOS
         if self.coords == coords_priority:
             self.delete_task(key)
-        #     print('Trashing...') 
-        #     self.canvas.delete("Comida4")
-        #     self.timecounter -= 3
         
         matrix = self.calc_matrix(self.inity, self.initx)
         self.rerender(self.inity, self.initx)
@@ -167,28 +178,40 @@ class GameBoard(tk.Frame):
 
     
     def prioritize(self, prior):
-        # if self.timecounter < 90:
-        #     self.prior = 'Battery'
-
-        # if self.prior == 'Battery':
-        #     list_to_search = self.basura_list
-        if self.prior == 'Trash':
+ 
+        if self.prior == 'Basura':
             list_to_search = list(self.basura_items.values())
+            key_items = self.basura_items
+        elif self.prior == 'Comida':
+            list_to_search = list(self.comida_items.values())
+            key_items = self.comida_items
+        elif self.prior == 'Bateria':
+            list_to_search = list(self.bateria_items.values())
+            key_items = self.bateria_items
         
         sorted_list = sorted(list_to_search, key=lambda x: x[1])
         x, y = sorted_list[0]
-        key = utils.get_key(self.basura_items, sorted_list[0])
+        key = utils.get_key(key_items, sorted_list[0])
         return([x, y], key)
         
     
     def delete_task(self, key):
         print(key)
         if key[0:-1] == 'Basura' or key[0:-2] == 'Basura':
+            self.timecounter -= 3 
+            remove_list = self.basura_items
+        elif key[0:-1] == 'Comida' or key[0:-2] == 'Comida':
             self.timecounter -= 5 
-            self.canvas.delete(key)
-            time.sleep(1)
-            self.basura_items = utils.removekey(self.basura_items, key)
-            print(self.basura_items)
+            remove_list = self.comida_items
+        elif key[0:-1] == 'Bateria' or key[0:-2] == 'Bateria':
+            self.timecounter += 30 
+            remove_list = self.bateria_items
+
+        print(self.timecounter)
+        self.canvas.delete(key)
+        time.sleep(1)
+        remove_list = utils.removekey(remove_list, key)
+        print(remove_list)
     
 
     def refresh(self, event):
