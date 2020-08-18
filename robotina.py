@@ -24,9 +24,10 @@ class GameBoard(tk.Frame):
         self.inity = 0
         self.prior = 'Basura'
         self.coords = [0, 0]
+    
 
-        self.timecounter = 60
-
+        self.timecounter = 100
+        self.wccounter = 0
         self.Robotina = tk.PhotoImage(file=robotina)
         self.Basura = tk.PhotoImage(file=basura)
         self.Pared = tk.PhotoImage(file=pared)
@@ -102,6 +103,12 @@ class GameBoard(tk.Frame):
         #Inicio
         self.boton=ttk.Button(self.canvas, text="mover robotina", command= self.eval)
         self.boton.place(x=1250,y=325,width=100,height=50)
+        self.label1 = tk.Label(self.canvas, text= 'Basura = -5')
+        self.label1.place(x=1150,y= 450, width=100, height=50)
+        self.label2 = tk.Label(self.canvas, text= 'Comida = -5')
+        self.label2.place(x=1250,y= 450, width=100, height=50)
+        self.label3 = tk.Label(self.canvas, text= 'Bateria = +40')
+        self.label3.place(x=1350,y= 450, width=100, height=50)
             
 
     def addpiece(self, name, image, row=0, column=0):
@@ -145,9 +152,16 @@ class GameBoard(tk.Frame):
         time.sleep(0.5)
         self.coords = [self.inity, self.initx]
 
-        if self.timecounter < 35 and self.timecounter > 20:
-            self.prior = 'Comida'
-        elif self.timecounter < 20:
+        if self.timecounter > 25:
+            if self.wccounter != 40:
+                if self.timecounter > 35 and self.timecounter < 60:
+                    self.prior = 'Comida'
+                elif self.timecounter > 50:
+                    self.prior = 'Basura'
+                self.wccounter += 1
+            else:
+                self.prior = 'WC'
+        else:
             self.prior = 'Bateria'
 
         if self.coords[0] < coords_priority[0]:
@@ -169,15 +183,22 @@ class GameBoard(tk.Frame):
     
     def prioritize(self, prior):
  
-        if self.prior == 'Basura':
-            list_to_search = list(self.basura_items.values())
-            key_items = self.basura_items
-        elif self.prior == 'Comida':
-            list_to_search = list(self.comida_items.values())
-            key_items = self.comida_items
-        elif self.prior == 'Bateria':
-            list_to_search = list(self.bateria_items.values())
-            key_items = self.bateria_items
+        if self.prior != 'WC':
+            if self.prior == 'Basura':
+                list_to_search = list(self.basura_items.values())
+                key_items = self.basura_items
+            elif self.prior == 'Comida':
+                list_to_search = list(self.comida_items.values())
+                key_items = self.comida_items
+            elif self.prior == 'Bateria':
+                list_to_search = list(self.bateria_items.values())
+                key_items = self.bateria_items
+        else:
+            list_to_search = list(self.wc_items.values())
+            if len(list_to_search) == 0:
+                self.wccounter = 0
+            else:
+                key_items = self.wc_items
         
         sorted_list = sorted(list_to_search, key=lambda x: x[1])
         x, y = sorted_list[0]
@@ -196,10 +217,14 @@ class GameBoard(tk.Frame):
             time.sleep(2)
             remove_list = self.comida_items
         elif key[0:-1] == 'Bateria' or key[0:-2] == 'Bateria':
-            self.timecounter += 40 
+            self.timecounter += 45 
             remove_list = self.bateria_items
             time.sleep(5)
-
+        elif key[0:-1] == 'WC':
+            self.timecounter -= 3 
+            remove_list = self.wc_items
+            time.sleep(3)
+            self.wccounter = 0
         print(self.timecounter)
         self.canvas.delete(key)
         remove_list = utils.removekey(remove_list, key)
