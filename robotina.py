@@ -102,8 +102,7 @@ class GameBoard(tk.Frame):
         #Inicio
         self.boton=ttk.Button(self.canvas, text="mover robotina", command= self.eval)
         self.boton.place(x=1250,y=325,width=100,height=50)
-        
-        
+            
 
     def addpiece(self, name, image, row=0, column=0):
         self.canvas.create_image(0,0, image=image, tags=(name), anchor="c")
@@ -162,19 +161,10 @@ class GameBoard(tk.Frame):
         # FUNCION PARA BORRAR ELEMENTOS
         if self.coords == coords_priority:
             self.delete_task(key)
-        
-        matrix = self.calc_matrix(self.inity, self.initx)
+
+        self.printBattery(self.timecounter)
         self.rerender(self.inity, self.initx)
 
-        
-    #Matriz de busqueda
-    def calc_matrix(self, y, x):
-        matrix = [
-            [y-1, x -1], [y -1, x], [y -1, x + 1],
-            [y, x -1], [y, x], [y, x + 1],
-            [y+1, x -1], [y +1, x], [y +1, x + 1],
-            ]
-        return matrix
 
     
     def prioritize(self, prior):
@@ -199,19 +189,25 @@ class GameBoard(tk.Frame):
         print(key)
         if key[0:-1] == 'Basura' or key[0:-2] == 'Basura':
             self.timecounter -= 3 
+            time.sleep(1)
             remove_list = self.basura_items
         elif key[0:-1] == 'Comida' or key[0:-2] == 'Comida':
             self.timecounter -= 5 
+            time.sleep(2)
             remove_list = self.comida_items
         elif key[0:-1] == 'Bateria' or key[0:-2] == 'Bateria':
-            self.timecounter += 30 
+            self.timecounter += 40 
             remove_list = self.bateria_items
+            time.sleep(5)
 
         print(self.timecounter)
         self.canvas.delete(key)
-        time.sleep(1)
         remove_list = utils.removekey(remove_list, key)
         print(remove_list)
+
+    def printBattery(self, time_counter):
+        self.label = tk.Label(self.canvas, text= str(time_counter))
+        self.label.place(x=1250,y= 500, width=100, height=50)
     
 
     def refresh(self, event):
