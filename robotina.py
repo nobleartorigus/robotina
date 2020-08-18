@@ -84,18 +84,19 @@ class GameBoard(tk.Frame):
         self.addpiece("Bateria4", self.Bateria, 15, 13)
         self.addpiece("Bateria5", self.Bateria, 8, 7)
         self.addpiece("Bateria6", self.Bateria, 3, 28)
+    
 
-        #Paredes
-        self.addpiece("Pared1", self.Pared, 15, 3)
-        self.addpiece("Pared2", self.Pared, 16, 3)
-        self.addpiece("Pared3", self.Pared, 11, 6)
-        self.addpiece("Pared4", self.Pared, 12, 6)
-        self.addpiece("Pared5", self.Pared, 9, 8)
-        self.addpiece("Pared6", self.Pared, 9, 9)
-        self.addpiece("Pared7", self.Pared, 6, 10)
-        self.addpiece("Pared8", self.Pared, 6, 11)
-        self.addpiece("Pared9", self.Pared, 6, 15)
-        self.addpiece("Pared10", self.Pared, 5, 15)
+        # #Paredes
+        # self.addpiece("Pared1", self.Pared, 15, 3)
+        # self.addpiece("Pared2", self.Pared, 16, 3)
+        # self.addpiece("Pared3", self.Pared, 11, 6)
+        # self.addpiece("Pared4", self.Pared, 12, 6)
+        # self.addpiece("Pared5", self.Pared, 9, 8)
+        # self.addpiece("Pared6", self.Pared, 9, 9)
+        # self.addpiece("Pared7", self.Pared, 6, 10)
+        # self.addpiece("Pared8", self.Pared, 6, 11)
+        # self.addpiece("Pared9", self.Pared, 6, 15)
+        # self.addpiece("Pared10", self.Pared, 5, 15)
 
         #Cama 
         self.addpiece("Cama", self.Cama, 16, 27)
@@ -105,11 +106,15 @@ class GameBoard(tk.Frame):
         self.boton.place(x=1250,y=325,width=100,height=50)
         self.label1 = tk.Label(self.canvas, text= 'Basura = -5')
         self.label1.place(x=1150,y= 450, width=100, height=50)
-        self.label2 = tk.Label(self.canvas, text= 'Comida = -5')
+        self.label2 = tk.Label(self.canvas, text= 'Comida = -3')
         self.label2.place(x=1250,y= 450, width=100, height=50)
-        self.label3 = tk.Label(self.canvas, text= 'Bateria = +40')
+        self.label3 = tk.Label(self.canvas, text= 'Bateria = +50')
         self.label3.place(x=1350,y= 450, width=100, height=50)
-            
+        self.label4 = tk.Label(self.canvas, text= 'WC = -3')
+        self.label4.place(x=1150,y= 500, width=100, height=50)
+        self.label5 = tk.Label(self.canvas, text= 'Cama = Bateria completa')
+        self.label5.place(x=1250,y= 500, width=200, height=50)
+     
 
     def addpiece(self, name, image, row=0, column=0):
         self.canvas.create_image(0,0, image=image, tags=(name), anchor="c")
@@ -154,9 +159,9 @@ class GameBoard(tk.Frame):
 
         if self.timecounter > 25:
             if self.wccounter != 40:
-                if self.timecounter > 35 and self.timecounter < 60:
+                if self.timecounter > 25 and self.timecounter < 60:
                     self.prior = 'Comida'
-                elif self.timecounter > 50:
+                elif self.timecounter > 60:
                     self.prior = 'Basura'
                 self.wccounter += 1
             else:
@@ -189,14 +194,30 @@ class GameBoard(tk.Frame):
                 key_items = self.basura_items
             elif self.prior == 'Comida':
                 list_to_search = list(self.comida_items.values())
-                key_items = self.comida_items
+                if len(list_to_search) == 0:
+                    list_to_search = list(self.basura_items.values())
+                    key_items = self.basura_items
+                else:
+                    key_items = self.comida_items
+
             elif self.prior == 'Bateria':
                 list_to_search = list(self.bateria_items.values())
-                key_items = self.bateria_items
+                if len(list_to_search) == 0:
+                    list_to_search = list(self.cama_item.values())
+                    key_items = self.cama_item
+                    if len(list_to_search) == 0:
+                        list_to_search = list(self.basura_items.values())
+                        key_items = self.basura_items
+                    else:
+                        key_items = self.cama_item
+                else:
+                    key_items = self.bateria_items
         else:
             list_to_search = list(self.wc_items.values())
             if len(list_to_search) == 0:
                 self.wccounter = 0
+                list_to_search = list(self.basura_items.values())
+                key_items = self.basura_items
             else:
                 key_items = self.wc_items
         
@@ -207,7 +228,6 @@ class GameBoard(tk.Frame):
         
     
     def delete_task(self, key):
-        print(key)
         if key[0:-1] == 'Basura' or key[0:-2] == 'Basura':
             self.timecounter -= 3 
             time.sleep(1)
@@ -217,7 +237,7 @@ class GameBoard(tk.Frame):
             time.sleep(2)
             remove_list = self.comida_items
         elif key[0:-1] == 'Bateria' or key[0:-2] == 'Bateria':
-            self.timecounter += 45 
+            self.timecounter += 50
             remove_list = self.bateria_items
             time.sleep(5)
         elif key[0:-1] == 'WC':
@@ -225,14 +245,16 @@ class GameBoard(tk.Frame):
             remove_list = self.wc_items
             time.sleep(3)
             self.wccounter = 0
-        print(self.timecounter)
+        elif key == 'Cama':
+            self.timecounter = 100 
+            time.sleep(7)
+            remove_list = self.cama_item
         self.canvas.delete(key)
         remove_list = utils.removekey(remove_list, key)
-        print(remove_list)
 
     def printBattery(self, time_counter):
         self.label = tk.Label(self.canvas, text= str(time_counter))
-        self.label.place(x=1250,y= 500, width=100, height=50)
+        self.label.place(x=1250,y= 550, width=100, height=50)
     
 
     def refresh(self, event):
