@@ -20,6 +20,7 @@ class GameBoard(tk.Frame):
         self.wc_items = {}
         self.pared_items = {}
         self.cama_item = {}
+        self.work_list = {}
         self.initx = 0
         self.inity = 0
         self.prior = 'Basura'
@@ -121,8 +122,10 @@ class GameBoard(tk.Frame):
         self.placepiece(name, row, column)
         if (name[0:-1] == 'Basura') or (name[0:-2] == 'Basura') :
             self.basura_items.update({name:(row, column)})
+            self.work_list.update({name:(row, column)})
         elif (name[0:-1] == 'Comida') or (name[0:-2] == 'Comida') :
             self.comida_items.update({name:(row, column)})
+            self.work_list.update({name:(row, column)})
         elif (name[0:-1] == 'Bateria'):
             self.bateria_items.update({name:(row, column)})
         elif (name[0:-1] == 'WC'):
@@ -152,11 +155,10 @@ class GameBoard(tk.Frame):
         self.canvas.after(100, self.eval) 
     
     def eval(self):
-        coords_priority, key = self.prioritize(self.prior)
+        coords_priority, key= self.prioritize(self.prior)
         self.timecounter -= 1
         time.sleep(0.5)
         self.coords = [self.inity, self.initx]
-
         if self.timecounter > 25:
             if self.wccounter != 40:
                 if self.timecounter > 25 and self.timecounter < 60:
@@ -192,6 +194,9 @@ class GameBoard(tk.Frame):
             if self.prior == 'Basura':
                 list_to_search = list(self.basura_items.values())
                 key_items = self.basura_items
+                # if tuple(self.coords) in list(self.comida_items.values()):
+                #     key = utils.get_key(self.comida_items, tuple(self.coords))
+                #     self.delete_task(key)
             elif self.prior == 'Comida':
                 list_to_search = list(self.comida_items.values())
                 if len(list_to_search) == 0:
@@ -199,6 +204,9 @@ class GameBoard(tk.Frame):
                     key_items = self.basura_items
                 else:
                     key_items = self.comida_items
+                    # if tuple(self.coords) in list(self.basura_items.values()):
+                        # key = utils.get_key(self.basura_items, tuple(self.coords))
+                        # self.delete_task(key)
 
             elif self.prior == 'Bateria':
                 list_to_search = list(self.bateria_items.values())
@@ -220,7 +228,6 @@ class GameBoard(tk.Frame):
                 key_items = self.basura_items
             else:
                 key_items = self.wc_items
-        
         sorted_list = sorted(list_to_search, key=lambda x: x[1])
         x, y = sorted_list[0]
         key = utils.get_key(key_items, sorted_list[0])
@@ -230,11 +237,11 @@ class GameBoard(tk.Frame):
     def delete_task(self, key):
         if key[0:-1] == 'Basura' or key[0:-2] == 'Basura':
             self.timecounter -= 3 
-            time.sleep(1)
+            time.sleep(2)
             remove_list = self.basura_items
         elif key[0:-1] == 'Comida' or key[0:-2] == 'Comida':
             self.timecounter -= 5 
-            time.sleep(2)
+            time.sleep(4)
             remove_list = self.comida_items
         elif key[0:-1] == 'Bateria' or key[0:-2] == 'Bateria':
             self.timecounter += 50
