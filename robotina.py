@@ -15,7 +15,9 @@ class GameBoard(tk.Frame):
         self.color2 = color2
         self.pieces = {}
         self.basura_items = {}
+        self.basura_item_counter = 11
         self.comida_items = {}
+        self.comida_item_counter = 11
         self.bateria_items = {}
         self.wc_items = {}
         self.pared_items = {}
@@ -88,52 +90,81 @@ class GameBoard(tk.Frame):
     
 
         # #Paredes
-        # self.addpiece("Pared1", self.Pared, 15, 3)
-        # self.addpiece("Pared2", self.Pared, 16, 3)
-        # self.addpiece("Pared3", self.Pared, 11, 6)
-        # self.addpiece("Pared4", self.Pared, 12, 6)
-        # self.addpiece("Pared5", self.Pared, 9, 8)
-        # self.addpiece("Pared6", self.Pared, 9, 9)
-        # self.addpiece("Pared7", self.Pared, 6, 10)
-        # self.addpiece("Pared8", self.Pared, 6, 11)
-        # self.addpiece("Pared9", self.Pared, 6, 15)
-        # self.addpiece("Pared10", self.Pared, 5, 15)
+        self.addpiece("Pared1", self.Pared, 15, 3)
+        self.addpiece("Pared2", self.Pared, 16, 3)
+        self.addpiece("Pared3", self.Pared, 11, 6)
+        self.addpiece("Pared4", self.Pared, 12, 6)
+        self.addpiece("Pared5", self.Pared, 9, 8)
+        self.addpiece("Pared6", self.Pared, 9, 9)
+        self.addpiece("Pared7", self.Pared, 6, 10)
+        self.addpiece("Pared8", self.Pared, 6, 11)
+        self.addpiece("Pared9", self.Pared, 6, 15)
+        self.addpiece("Pared10", self.Pared, 10, 16)
+        self.addpiece("Pared11", self.Pared, 11, 16)
+        self.addpiece("Pared12", self.Pared, 1, 14)
+        self.addpiece("Pared13", self.Pared, 17, 13)
+        self.addpiece("Pared14", self.Pared, 18, 13)
+        self.addpiece("Pared15", self.Pared, 19, 27)
+        self.addpiece("Pared16", self.Pared, 18, 27)
+        self.addpiece("Pared17", self.Pared, 17, 27)
+        self.addpiece("Pared18", self.Pared, 17, 28)
+        self.addpiece("Pared19", self.Pared, 17, 29)
+        self.addpiece("Pared20", self.Pared, 5, 26)
+        self.addpiece("Pared21", self.Pared, 6, 26)
+        self.addpiece("Pared22", self.Pared, 11, 27)
+        self.addpiece("Pared23", self.Pared, 11, 28)
+        self.addpiece("Pared24", self.Pared, 11, 29)
+        self.addpiece("Pared25", self.Pared, 11, 26)
+        self.addpiece("Pared26", self.Pared, 11, 25)
+        self.addpiece("Pared27", self.Pared, 15, 7)
+        self.addpiece("Pared28", self.Pared, 15, 8)
+        self.addpiece("Pared29", self.Pared, 15, 9)
+        self.addpiece("Pared30", self.Pared, 15, 6)
 
         #Cama 
         self.addpiece("Cama", self.Cama, 16, 27)
 
         #Inicio
         self.boton=ttk.Button(self.canvas, text="mover robotina", command= self.eval)
-        self.boton.place(x=1250,y=325,width=100,height=50)
+        self.boton.place(x=1300,y=325,width=100,height=50)
         self.label1 = tk.Label(self.canvas, text= 'Basura = -5')
-        self.label1.place(x=1150,y= 450, width=100, height=50)
+        self.label1.place(x=1200,y= 450, width=100, height=50)
         self.label2 = tk.Label(self.canvas, text= 'Comida = -3')
-        self.label2.place(x=1250,y= 450, width=100, height=50)
+        self.label2.place(x=1300,y= 450, width=100, height=50)
         self.label3 = tk.Label(self.canvas, text= 'Bateria = +50')
-        self.label3.place(x=1350,y= 450, width=100, height=50)
+        self.label3.place(x=1400,y= 450, width=100, height=50)
         self.label4 = tk.Label(self.canvas, text= 'WC = -3')
-        self.label4.place(x=1150,y= 500, width=100, height=50)
+        self.label4.place(x=1200,y= 500, width=100, height=50)
         self.label5 = tk.Label(self.canvas, text= 'Cama = Bateria completa')
-        self.label5.place(x=1250,y= 500, width=200, height=50)
-     
+        self.label5.place(x=1300,y= 500, width=200, height=50)
+
+        #Objetos dinamicos
+        self.add_trash=ttk.Button(self.canvas, text="Agregar Basura", command= lambda: self.addpiece('BasuraX', self.Basura, 2, 2))
+        self.add_trash.place(x=1150,y=125,width=100,height=50)
+        self.add_trash=ttk.Button(self.canvas, text="Agregar Comida", command= lambda: self.addpiece('ComidaX', self.Comida, 4, 4))
+        self.add_trash.place(x=1250,y=125,width=100,height=50)
 
     def addpiece(self, name, image, row=0, column=0):
-        self.canvas.create_image(0,0, image=image, tags=(name), anchor="c")
-        self.placepiece(name, row, column)
         if (name[0:-1] == 'Basura') or (name[0:-2] == 'Basura') :
+            name = 'Basura' + str(self.basura_item_counter)
             self.basura_items.update({name:(row, column)})
             self.work_list.update({name:(row, column)})
+            self.basura_item_counter += 1
         elif (name[0:-1] == 'Comida') or (name[0:-2] == 'Comida') :
+            name = 'Comida' + str(self.comida_item_counter)
             self.comida_items.update({name:(row, column)})
             self.work_list.update({name:(row, column)})
+            self.comida_item_counter += 1
         elif (name[0:-1] == 'Bateria'):
             self.bateria_items.update({name:(row, column)})
         elif (name[0:-1] == 'WC'):
             self.wc_items.update({name:(row, column)})
-        elif (name[0:-1] == 'Pared'):
+        elif (name[0:-1] == 'Pared') or (name[0:-2] == 'Pared'):
             self.pared_items.update({name:(row, column)})
         elif (name == 'Cama'):
             self.cama_item.update({name:(row, column)})
+        self.object = self.canvas.create_image(0,0, image=image, tags=(name), anchor="c")
+        self.placepiece(name, row, column)
 
     def placepiece(self, name, row, column):
         if row or column < 8:
@@ -157,7 +188,7 @@ class GameBoard(tk.Frame):
     def eval(self):
         coords_priority, key= self.prioritize(self.prior)
         self.timecounter -= 1
-        time.sleep(0.5)
+        # time.sleep(0.5)
         self.coords = [self.inity, self.initx]
         if self.timecounter > 25:
             if self.wccounter != 40:
@@ -170,15 +201,34 @@ class GameBoard(tk.Frame):
                 self.prior = 'WC'
         else:
             self.prior = 'Bateria'
-
+        print(self.coords)
         if self.coords[0] < coords_priority[0]:
-            self.inity += 1
+            if self.evade_obstacles('y') == True:
+                print('bajo en y')
+                self.initx += 1
+                # Se trabaa porque puede aparecer dentro de un muro
+            else:
+                self.inity += 1
         elif self.coords[0] > coords_priority[0]:
-            self.inity -= 1
+            if self.evade_obstacles('-y') == True:
+                print('subo en y')
+                self.initx -= 1
+            else:
+                self.inity -= 1
         elif self.coords[1] < coords_priority[1]:
-            self.initx += 1
+            if self.evade_obstacles('x') == True:
+                print('izquierda')
+                self.inity -= 1
+                if self.evade_obstacles('x') == True:
+                    self.inity -= 1
+            else:
+                self.initx += 1
         elif self.coords[1] > coords_priority[1]:
-            self.initx -= 1
+            if self.evade_obstacles('-x') == True:
+               print('derecha')
+               self.inity += 1
+            else:
+                self.initx -= 1
         # FUNCION PARA BORRAR ELEMENTOS
         if self.coords == coords_priority:
             self.delete_task(key)
@@ -186,14 +236,35 @@ class GameBoard(tk.Frame):
         self.printBattery(self.timecounter)
         self.rerender(self.inity, self.initx)
 
-
+    def evade_obstacles(self, dir):
+        x, y = self.coords
+        if dir == 'y':
+            nextx = x + 1
+            nexty = y 
+        elif dir == '-y':
+            nextx = x - 1 
+            nexty = y
+        elif dir == 'x':
+            nextx = x 
+            nexty = y + 1
+        elif dir == '-x':
+            nextx = x
+            nexty = y - 1
+        print(nextx, nexty)
+        if (nextx, nexty) in list(self.pared_items.values()):
+            return True
+        
     
     def prioritize(self, prior):
  
         if self.prior != 'WC':
             if self.prior == 'Basura':
                 list_to_search = list(self.basura_items.values())
-                key_items = self.basura_items
+                if len(list_to_search) == 0:
+                    # ir ------------------> a casilla 0, 0
+                    pass
+                else:
+                    key_items = self.basura_items
                 # if tuple(self.coords) in list(self.comida_items.values()):
                 #     key = utils.get_key(self.comida_items, tuple(self.coords))
                 #     self.delete_task(key)
@@ -237,31 +308,31 @@ class GameBoard(tk.Frame):
     def delete_task(self, key):
         if key[0:-1] == 'Basura' or key[0:-2] == 'Basura':
             self.timecounter -= 3 
-            time.sleep(2)
+            # time.sleep(2)
             remove_list = self.basura_items
         elif key[0:-1] == 'Comida' or key[0:-2] == 'Comida':
             self.timecounter -= 5 
-            time.sleep(4)
+            # time.sleep(4)
             remove_list = self.comida_items
         elif key[0:-1] == 'Bateria' or key[0:-2] == 'Bateria':
             self.timecounter += 50
             remove_list = self.bateria_items
-            time.sleep(5)
+            # time.sleep(5)
         elif key[0:-1] == 'WC':
             self.timecounter -= 3 
             remove_list = self.wc_items
-            time.sleep(3)
+            # time.sleep(3)
             self.wccounter = 0
         elif key == 'Cama':
             self.timecounter = 100 
-            time.sleep(7)
+            # time.sleep(7)
             remove_list = self.cama_item
         self.canvas.delete(key)
         remove_list = utils.removekey(remove_list, key)
 
     def printBattery(self, time_counter):
         self.label = tk.Label(self.canvas, text= str(time_counter))
-        self.label.place(x=1250,y= 550, width=100, height=50)
+        self.label.place(x=1300,y= 550, width=100, height=50)
     
 
     def refresh(self, event):
@@ -302,3 +373,11 @@ if __name__ == "__main__":
     board.pack(side="top", fill="both", expand="true", padx=4, pady=4)
    
     root.mainloop()
+
+    #EVALUAR punto inaccesible
+    #ANADIR tareas dinamicamente
+    #OBSTACULOS  NO funcionan porque evaluo +1 en dos direcciones y solo me recorro en 1
+    #QUE SIGA CORRIENDO TIEMPO
+    #CAMA PERMANENTE minimo 1 pero habra dos camas
+    #Se podran reubicar objetos
+    #No se podran poner objetos en la misma casilla
