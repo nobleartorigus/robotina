@@ -130,15 +130,15 @@ class GameBoard(tk.Frame):
         self.addpiece("Pared33", self.Pared, 19, 28)
 
         #Cama 
-        # self.addpiece("Cama1", self.Cama, 16, 27)
-        self.addpiece("Cama2", self.Cama, 4, 15)
+        self.addpiece("Cama1", self.Cama, 16, 27)
+        self.addpiece("Cama2", self.Cama, 2, 5)
 
         #Casa 
         self.addpiece('Casa', self.Casa, 0, 0)
 
         #Inicio
         self.boton=ttk.Button(self.canvas, text="Iniciar Robotina", command= self.eval)
-        self.boton.place(x=1300,y=325,width=100,height=50)
+        self.boton.place(x=1250,y=325,width=100,height=50)
         self.label1 = tk.Label(self.canvas, text= 'Basura = -5')
         self.label1.place(x=1200,y= 450, width=100, height=50)
         self.label2 = tk.Label(self.canvas, text= 'Comida = -3')
@@ -150,9 +150,9 @@ class GameBoard(tk.Frame):
         self.label5 = tk.Label(self.canvas, text= 'Cama = Bateria completa')
         self.label5.place(x=1300,y= 500, width=200, height=50)
         self.x = tk.Entry(self.canvas)
-        self.x.place(x=1200,y=200,width=100,height=50)
+        self.x.place(x=1200,y=200,width=100,height=30)
         self.y = tk.Entry(self.canvas)
-        self.y.place(x=1300,y=200,width=100,height=50)
+        self.y.place(x=1300,y=200,width=100,height=30)
     
 
         #Objetos dinamicos
@@ -162,6 +162,12 @@ class GameBoard(tk.Frame):
         self.add_trash.place(x=1250,y=125,width=100,height=50)
         self.add_trash=ttk.Button(self.canvas, text="Agregar WC", command= lambda: self.addpiece('WCX', self.WC, int(self.y.get()), int(self.x.get())))
         self.add_trash.place(x=1350,y=125,width=100,height=50)
+        self.add_trash=ttk.Button(self.canvas, text="Reubicar Cama1", command= lambda: self.addpiece('Cama2', self.Cama, int(self.y.get()), int(self.x.get())))
+        self.add_trash.place(x=1200,y=230,width=100,height=50)
+        self.add_trash=ttk.Button(self.canvas, text="Reubicar Cama2", command= lambda: self.addpiece('Cama1', self.Cama, int(self.y.get()), int(self.x.get())))
+        self.add_trash.place(x=1300,y=230,width=100,height=50)
+        self.add_trash=ttk.Button(self.canvas, text="Romper Muro", command= lambda: self.destroywall())
+        self.add_trash.place(x=1250,y=370,width=100,height=50)
 
     def addpiece(self, name, image, row=0, column=0):
         if (name[0:-1] == 'Basura') or (name[0:-2] == 'Basura') :
@@ -195,7 +201,13 @@ class GameBoard(tk.Frame):
         elif (name[0:-1] == 'Pared') or (name[0:-2] == 'Pared'):
             self.pared_items.update({name:(row, column)})
         elif (name[0:-1] == 'Cama'):
-            self.cama_item.update({name:(row, column)})
+            if self.validate_list(row, column):
+                image = None 
+                name = None
+            else:
+                self.canvas.delete(name)
+                self.cama_item.update({name:(row, column)})
+            print(self.cama_item)
         elif (name == 'Casa'):
             self.casa_item.update({name:(row, column)})
 
@@ -216,6 +228,13 @@ class GameBoard(tk.Frame):
             y0 = (row * self.size) + int(self.size/2)
             self.canvas.coords("Robotina", x0, y0)
       
+    def destroywall(self):
+        key_list = ['Pared16', 'Pared15', 'Pared31', 'Pared32', 'Pared33', 'Pared18']
+        for i in key_list:
+            self.canvas.delete(i)
+            self.delete_task(i)
+ 
+
     def rerender(self, y, x):
         self.move_robotina(y, x)
         self.canvas.after(100, self.eval) 
@@ -223,7 +242,7 @@ class GameBoard(tk.Frame):
     def eval(self):
         coords_priority, key= self.prioritize(self.prior)
         self.timecounter -= 1
-        # time.sleep(0.5)
+        # time.sleep(0.1)
         self.coords = [self.inity, self.initx]
         if self.timecounter > 25:
             if self.wccounter != 40:
@@ -324,18 +343,7 @@ class GameBoard(tk.Frame):
                 list_to_search = list(self.bateria_items.values())
                 if len(list_to_search) == 0:
                     list_to_search = list(self.cama_item.values())
-                    key_items = self.cama_item
-                    # if self.coords[1] > 15:
-                    #     list_to_search = list(self.cama_item.values())[0]
-                    #     print(list(self.cama_item.values())[0])
-                    #     key_items = key_items['Cama1']
-                    #     # print(key_items['Cama1'])
-                    # else:
-                    #     list_to_search = list(self.cama_item.values())[1]
-                    #     key_items = key_items['Cama2']
-                    #     print(list(self.cama_item.values())[1])
-                    #     # print(key_items['Cama2'])
-                        
+                    key_items = self.cama_item                
                 else:
                     key_items = self.bateria_items
         else:
@@ -350,6 +358,9 @@ class GameBoard(tk.Frame):
             sorted_list = sorted(list_to_search, key=lambda x: x[1])
             x, y = sorted_list[0]
             key = utils.get_key(key_items, sorted_list[0])
+            if (key_items == self.cama_item) and (self.coords[1] > 14):
+                x, y = sorted_list[1]
+                key = utils.get_key(key_items, sorted_list[1])
             if self.validate_accesible_point(key):
                 print('no se puede')
                 x, y = sorted_list[1]
@@ -412,6 +423,9 @@ class GameBoard(tk.Frame):
                 key = None
                 remove_list = None
                 print(remove_list)
+            elif key[0:-2]  == 'Pared':
+                remove_list = self.pared_items
+                print(remove_list)
 
             self.canvas.delete(key)
             remove_list = utils.removekey(remove_list, key)
@@ -461,6 +475,3 @@ if __name__ == "__main__":
    
     root.mainloop()
 
-    #EVALUAR punto inaccesible
-    #QUE SIGA CORRIENDO TIEMPO
-    #Se podran reubicar cama
